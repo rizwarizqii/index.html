@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ✏️ EDIT: judul tab browser -->
+<title>Surat Ulang Tahun untukmu 🎂</title>
+
+<!-- Font imut dari Google Fonts (butuh internet). Kalau offline, otomatis pakai font cadangan -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     🎨 PALET WARNA — ganti kode hex di sini, seluruh web ikut berubah
+     ============================================================ */
+  :root {
+    /* Nama variabel tetap (--pink dst.) supaya kode lain tidak perlu diubah,
+       tapi nilainya sekarang ungu. */
+    --pink:      #b794f6;  /* ungu utama (amplop, tombol, bingkai) */
+    --pink-soft: #f1e8ff;  /* latar belakang halaman (ungu pucat) */
+    --pink-deep: #7c4dbd;  /* ungu tua (judul, aksen) */
+    --mint:      #c5f0e1;  /* hijau mint (pita, hiasan) */
+    --butter:    #fff3c4;  /* kuning mentega (kertas surat) */
+    --lavender:  #ffd3e8;  /* pink lembut (hiasan, tombol kedua) */
+    --cocoa:     #4a2f6b;  /* warna teks */
+
+    --font-judul: "Fredoka", "Trebuchet MS", sans-serif;
+    --font-isi:   "Nunito", "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; }
+
+  body {
+    min-height: 100vh;
+    font-family: var(--font-isi);
+    color: var(--cocoa);
+    background:
+      radial-gradient(circle at 15% 20%, var(--lavender) 0, transparent 40%),
+      radial-gradient(circle at 85% 80%, var(--mint) 0, transparent 40%),
+      var(--pink-soft);
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 16px 80px;
+    overflow-x: hidden;
+  }
+
+  h1 { font-family: var(--font-judul); font-weight: 600; color: var(--pink-deep); text-align: center; font-size: clamp(1.8rem, 6vw, 2.6rem); line-height: 1.2; }
+  .petunjuk { margin: 8px 0 28px; text-align: center; font-weight: 600; }
+
+  /* ---------- Hiasan melayang (dibuat oleh JS di bawah) ---------- */
+  .melayang { position: fixed; bottom: -40px; pointer-events: none; animation: naik linear infinite; opacity: .7; z-index: 0; }
+  @keyframes naik { to { transform: translateY(-115vh) rotate(25deg); } }
+
+  main { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; align-items: center; }
+
+  /* ---------- AMPLOP ---------- */
+  .amplop {
+    position: relative; width: min(320px, 85vw); aspect-ratio: 3 / 2;
+    background: var(--pink); border-radius: 14px; border: 4px solid var(--pink-deep);
+    cursor: pointer; transition: transform .2s, opacity .5s;
+    animation: goyang 2.4s ease-in-out infinite;
+  }
+  .amplop:hover { transform: scale(1.04); }
+  .amplop:focus-visible { outline: 4px solid var(--lavender); outline-offset: 6px; }
+  .tutup-amplop { /* segitiga penutup */
+    position: absolute; inset: 0 0 auto 0; height: 58%;
+    background: var(--pink-deep); clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top; transition: transform .7s;
+    border-radius: 10px 10px 0 0;
+  }
+  .stiker { /* stiker hati di tengah amplop */
+    position: absolute; left: 50%; top: 52%; translate: -50% -50%;
+    width: 54px; height: 54px; border-radius: 50%; background: var(--butter);
+    display: grid; place-items: center; font-size: 1.7rem; z-index: 2;
+    border: 3px solid var(--mint);
+  }
+  .amplop.buka { animation: none; }
+  .amplop.buka .tutup-amplop { transform: rotateX(180deg); }
+  .amplop.buka .stiker { opacity: 0; }
+  .amplop.hilang { opacity: 0; transform: scale(.8); pointer-events: none; position: absolute; }
+  @keyframes goyang { 0%,100% { rotate: -2deg; } 50% { rotate: 2deg; } }
+
+  /* ---------- KERTAS SURAT ---------- */
+  .surat {
+    display: none; width: min(560px, 100%); margin-top: 8px;
+    background: var(--butter); border-radius: 22px; padding: 36px 28px 32px;
+    border: 4px solid var(--pink); box-shadow: 10px 10px 0 var(--mint);
+    /* garis-garis seperti kertas bergaris */
+    background-image: repeating-linear-gradient(transparent 0 33px, #f6d9a0 33px 34px);
+    background-position: 0 70px;
+    animation: muncul .8s cubic-bezier(.2, 1.3, .4, 1);
+  }
+  .surat.tampil { display: block; }
+  @keyframes muncul { from { transform: translateY(40px) scale(.9); opacity: 0; } }
+
+  .surat .kepada { font-family: var(--font-judul); font-size: 1.4rem; color: var(--pink-deep); margin-bottom: 14px; }
+  .surat p { line-height: 34px; margin-bottom: 34px; font-size: 1.05rem; }
+  .surat .penutup { text-align: right; font-family: var(--font-judul); color: var(--pink-deep); font-size: 1.2rem; line-height: 1.5; margin: 6px 0 0; }
+  .hiasan-atas { text-align: center; font-size: 1.8rem; letter-spacing: 8px; margin-bottom: 8px; }
+
+  .tombol {
+    margin-top: 22px; padding: 10px 22px; border: 3px solid var(--pink-deep);
+    background: var(--pink); color: #fff; border-radius: 999px; cursor: pointer;
+    font: 600 1rem var(--font-judul); transition: transform .15s;
+  }
+  .tombol:hover { transform: scale(1.06); }
+  .tombol:focus-visible { outline: 4px solid var(--lavender); outline-offset: 3px; }
+
+  /* ---------- TOMBOL MUSIK (pojok kanan bawah) ---------- */
+  .musik {
+    position: fixed; right: 16px; bottom: 16px; z-index: 5;
+    width: 56px; height: 56px; border-radius: 50%; font-size: 1.5rem;
+    border: 3px solid var(--pink-deep); background: var(--lavender); cursor: pointer;
+  }
+  .musik.main { animation: putar 3s linear infinite; background: var(--mint); }
+  .musik:focus-visible { outline: 4px solid var(--pink); outline-offset: 3px; }
+  @keyframes putar { to { rotate: 360deg; } }
+
+  /* ---------- Tombol berjajar ---------- */
+  .aksi { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .aksi[hidden], .panel[hidden] { display: none; }
+  .tombol.kedua { background: var(--lavender); color: var(--cocoa); }
+  .tombol:disabled { opacity: .5; cursor: default; }
+
+  /* ---------- PANEL (slide kenangan & tiup lilin) ---------- */
+  .panel { width: min(560px, 100%); display: flex; flex-direction: column; align-items: center; text-align: center; animation: muncul .8s cubic-bezier(.2, 1.3, .4, 1); }
+  .panel h2 { font-family: var(--font-judul); color: var(--pink-deep); font-size: clamp(1.5rem, 5vw, 2rem); margin-bottom: 16px; }
+
+  /* Foto gaya polaroid */
+  .polaroid { width: min(340px, 88vw); background: #fff; padding: 14px 14px 18px; border: 4px solid var(--pink); border-radius: 12px; box-shadow: 8px 8px 0 var(--lavender); rotate: -2deg; transition: rotate .3s; }
+  .polaroid.ganti { rotate: 2deg; }
+  .foto { aspect-ratio: 1; background: var(--pink-soft); border-radius: 6px; overflow: hidden; display: grid; place-items: center; }
+  .foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .foto .kosongan { display: none; padding: 16px; font-weight: 600; }
+  .foto.kosong img { display: none; }
+  .foto.kosong .kosongan { display: block; }
+  .polaroid h3 { font-family: var(--font-judul); color: var(--pink-deep); margin-top: 14px; font-size: 1.2rem; }
+  .polaroid p { margin-top: 6px; line-height: 1.5; }
+  .navigasi { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+  .panah { width: 46px; height: 46px; border-radius: 50%; border: 3px solid var(--pink-deep); background: var(--mint); font-size: 1.1rem; cursor: pointer; color: var(--cocoa); }
+  .panah:focus-visible { outline: 4px solid var(--lavender); outline-offset: 3px; }
+  .titik { display: flex; gap: 8px; }
+  .titik i { width: 12px; height: 12px; border-radius: 50%; background: var(--lavender); transition: background .2s; }
+  .titik i.aktif { background: var(--pink-deep); }
+
+  /* Kue & lilin */
+  .kue { position: relative; width: 240px; margin: 80px 0 24px; }
+  .lilin-baris { position: absolute; left: 0; right: 0; top: -62px; display: flex; justify-content: center; gap: 34px; }
+  .lilin { position: relative; width: 14px; height: 46px; margin-top: 16px; border-radius: 4px; background: repeating-linear-gradient(45deg, var(--mint) 0 8px, #fff 8px 16px); }
+  .api { position: absolute; left: 50%; top: -26px; translate: -50% 0; width: 14px; height: 24px; border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%; background: radial-gradient(circle at 50% 70%, #fff6b0, #ffb02e 60%, #ff7a3d); transform-origin: bottom; animation: kedip .35s ease-in-out infinite alternate; transition: opacity .3s, transform .3s; }
+  .lilin.padam .api { opacity: 0; transform: scale(0); animation: none; }
+  @keyframes kedip { to { transform: scale(1.1, .9) rotate(4deg); } }
+  .kue-atas { height: 54px; border: 4px solid var(--pink-deep); border-bottom: none; border-radius: 18px 18px 6px 6px; background: radial-gradient(circle, #fff 3px, transparent 4px) 0 0 / 22px 22px, var(--pink); }
+  .kue-bawah { height: 64px; border: 4px solid var(--pink-deep); border-radius: 0 0 18px 18px; background: var(--butter); }
+  .piring { height: 14px; margin: 0 -22px; background: var(--lavender); border: 3px solid var(--pink-deep); border-radius: 999px; }
+  .status { min-height: 1.6em; font-weight: 600; margin: 8px 0 14px; }
+
+  /* Layar kata sandi (menutupi seluruh halaman sampai sandi benar) */
+  .gerbang { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px;
+    background: radial-gradient(circle at 15% 20%, var(--lavender) 0, transparent 40%), radial-gradient(circle at 85% 80%, var(--mint) 0, transparent 40%), var(--pink-soft); }
+  .gerbang[hidden] { display: none; }
+  .kartu-pw { width: min(360px, 100%); text-align: center; background: var(--butter); border: 4px solid var(--pink); border-radius: 22px; box-shadow: 10px 10px 0 var(--mint); padding: 32px 24px; }
+  .kartu-pw .gembok { font-size: 2.6rem; }
+  .kartu-pw h2 { font-family: var(--font-judul); color: var(--pink-deep); margin: 8px 0; }
+  .kartu-pw input { width: 100%; margin-top: 18px; padding: 12px 16px; border: 3px solid var(--pink); border-radius: 999px; background: #fff; color: var(--cocoa); font: 600 1rem var(--font-isi); text-align: center; }
+  .kartu-pw input:focus-visible { outline: 4px solid var(--lavender); outline-offset: 2px; }
+  .kartu-pw .galat { min-height: 1.5em; margin-top: 10px; font-weight: 600; color: var(--pink-deep); }
+  .kartu-pw.salah { animation: getar .4s; }
+  @keyframes getar { 20%, 60% { translate: -8px 0; } 40%, 80% { translate: 8px 0; } }
+
+  /* Halaman penutup */
+  .penutup-kartu { background: var(--butter); border: 4px solid var(--pink); border-radius: 22px; box-shadow: 10px 10px 0 var(--lavender); padding: 32px 26px; }
+  .penutup-kartu p { line-height: 1.7; margin-bottom: 14px; }
+  .penutup-kartu .tanda { font-family: var(--font-judul); color: var(--pink-deep); font-size: 1.2rem; }
+
+  /* Konfeti */
+  .konfeti { position: fixed; top: -30px; pointer-events: none; z-index: 6; animation: jatuh linear forwards; }
+  @keyframes jatuh { to { transform: translateY(110vh) rotate(540deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     🎵 MUSIK
+     Cara memasukkan MP3:
+       1. Buat folder bernama "musik" di sebelah file index.html ini.
+       2. Taruh file lagu di dalamnya, misalnya: musik/lagu.mp3
+       3. Pastikan nama file di bawah (src="...") sama persis,
+          termasuk huruf besar/kecil dan tanpa spasi (pakai tanda - atau _).
+     Struktur folder:
+       surat-ulang-tahun/
+       ├── index.html
+       └── musik/
+           └── lagu.mp3
+     ✏️ EDIT: ganti "musik/lagu.mp3" dengan lokasi file lagumu.
+     ============================================================ -->
+<audio id="lagu" src="mp3.mp3" autoplay="autoplay"></audio>
+
+<!-- ============================================================
+     🔒 LAYAR KATA SANDI (halaman 1)
+     Kata sandinya diatur di script, cari "PASSWORD" di bagian PENGATURAN.
+     ✏️ EDIT: judul & tulisan tombol boleh diganti di sini.
+     ============================================================ -->
+<div class="gerbang" id="gerbang">
+  <form class="kartu-pw" id="formPw" autocomplete="off">
+    <div class="gembok">🔒</div>
+    <h2>Surat ini dikunci</h2>
+    <p id="petunjukPw"></p>
+    <input type="password" id="inputPw" placeholder="Ketik kata sandi" aria-label="Kata sandi" required>
+    <div class="galat" id="galatPw" aria-live="polite"></div>
+    <button type="submit" class="tombol" style="margin-top:6px">Buka 🔑</button>
+  </form>
+</div>
+
+<main>
+  <!-- ✏️ EDIT: judul & petunjuk di atas amplop -->
+  <h1>Ada surat spesial untukmu! 💌</h1>
+  <p class="petunjuk" id="petunjuk">Ketuk amplopnya ya</p>
+
+  <!-- Amplop: diklik untuk membuka surat -->
+  <div class="amplop" id="amplop" role="button" tabindex="0" aria-label="Buka surat">
+    <div class="tutup-amplop"></div>
+    <div class="stiker">💜</div>
+  </div>
+
+  <!-- ============================================================
+       💌 ISI SURAT
+       Ganti teks di dalam tag <p> sesuai keinginan.
+       Mau tambah paragraf? Salin satu baris <p>...</p> lalu tempel di bawahnya.
+       ============================================================ -->
+  <article class="surat" id="surat">
+    <!-- ✏️ EDIT: emoji hiasan di atas surat (bebas diganti) -->
+    <div class="hiasan-atas">✨🎂✨</div>
+
+    <!-- ✏️ EDIT: nama penerima -->
+    <div class="kepada">Dini Cahayani Azkiya,</div>
+
+    <!-- ✏️ EDIT: paragraf-paragraf surat -->
+    <p>Selamat ulang tahun orang spesial kuu hari ini hari spesialmu, jadi kamu berhak makan kue sebanyak-banyaknya hehe. 🍰</p>
+    <p>Makasii yaa udaa jadi orang yang pernah hadir dihidup aku. Kamu lucu, cantik, baik hati, dan selalu bisa bikin aku tersenyum.</p>
+    <p>Semoga tahun ini penuh kebahagiaan, kesehatan, dan semua mimpimu pelan-pelan jadi kenyataan. aamiin✨</p>
+
+    <!-- ✏️ EDIT: kalimat penutup & nama pengirim -->
+    <div class="penutup">
+      from,<br>
+      siapaa yaaa 🦋
+    </div>
+  </article>
+
+  <!-- ✏️ EDIT: tulisan pada tombol (muncul setelah surat dibuka) -->
+  <div class="aksi" id="aksiSurat" hidden>
+    <!-- ✏️ EDIT: tulisan tombol -->
+    <button class="tombol" id="kenangan">Lihat kenangan 📸</button>
+    <button class="tombol kedua" id="ulang">Tutup surat 💜</button>
+  </div>
+
+  <!-- ============================================================
+       📸 SLIDE KENANGAN
+       Isi foto & teksnya TIDAK diedit di sini, tapi di daftar SLIDES
+       pada bagian <script> di bawah (cari tulisan "PENGATURAN").
+       ✏️ EDIT: judul panel boleh diganti di bawah ini.
+       ============================================================ -->
+  <section class="panel" id="kenanganPanel" hidden>
+    <h2>Kenangan kita 📸</h2>
+    <div class="polaroid" id="polaroid">
+      <div class="foto" id="foto">
+        <img id="fotoImg" alt="foto kenangan">
+        <!-- Tampil otomatis kalau file foto belum ada -->
+        <div class="foto">📷 Foto belum ada.<br>Taruh fotomu di folder foto/</div>
+      </div>
+      <h3 id="fotoJudul"></h3>
+      <p id="fotoTeks"></p>
+    </div>
+    <div class="navigasi">
+      <button class="panah" id="prev" aria-label="Foto sebelumnya">◀</button>
+      <div class="titik" id="titik"></div>
+      <button class="panah" id="next" aria-label="Foto berikutnya">▶</button>
+    </div>
+    <!-- ✏️ EDIT: tulisan tombol menuju sesi tiup lilin -->
+    <button class="tombol" id="keLilin">Lanjut tiup lilin 🎂</button>
+  </section>
+
+  <!-- ============================================================
+       🎂 SESI TIUP LILIN
+       Jumlah lilin & pesan akhir diatur di bagian PENGATURAN (script).
+       ============================================================ -->
+  <section class="panel" id="lilinPanel" hidden>
+    <!-- ✏️ EDIT: judul & instruksi -->
+    <h2>Waktunya tiup lilin! 🎂</h2>
+    <p>Pejamkan mata dan berdoa dulu ya…</p>
+    <div class="kue" id="kue">
+      <div class="lilin-baris" id="lilinBaris"></div>
+      <div class="kue-atas"></div>
+      <div class="kue-bawah"></div>
+      <div class="piring"></div>
+    </div>
+    <div class="status" id="statusLilin" aria-live="polite"></div>
+    <div class="aksi" id="aksiLilin">
+      <button class="tombol" id="mic">Aktifkan mikrofon 🌬️</button>
+      <button class="tombol kedua" id="tap">Ketuk untuk tiup</button>
+    </div>
+  </section>
+  <!-- ============================================================
+       💜 KATA PENUTUP (halaman terakhir, muncul setelah lilin padam)
+       ✏️ EDIT: ganti judul, paragraf, dan tanda tangan sesukamu.
+       Mau tambah paragraf? Salin satu baris <p>...</p>.
+       ============================================================ -->
+  <section class="panel" id="penutupPanel" hidden>
+    <div class="penutup-kartu">
+      <h2>Aku mau bilang bentar yaa💜</h2>
+      <p>makasii yaa udaa baca surat ini sampai habis dan kamu udaa ngeluangin waktu buat lihat semua kenangannya.</p>
+      <p>Apa pun yang terjadi tahun ini, ingat bahwa kamu berharga dan selalu ada yang menyayangimu.</p>
+      <p>Sekali lagi, selamat ulang tahun. Semoga harimu semanis kue tadi!🎂, aku minta maaf yaa pernah ngecewain kamu, ternyata bener kata kamu mau nyari yang gimanapun lagi gaada yang lebih baik dari kamu, aku pun udaa nyoba buat kenal dan nyari hubungan dengan orang baru tapi nyatanya itu ga berjalan mulus cuma bertahan 1 minggu, karena hati aku masih buat kamu, maka dari itu aku mau ngajak kamu buat balik ke aku lagi, tapi aku juga gatau apa kamu saat ini udaa ada cowo atau belum, aku cuma mau bilang kalo aku masii sayang banget sama kamu, bahkan setiap hari aku masii sering stalk akun kamu, tapi aku baru berani ngomong hari ini di hari ulang thun kamu, semoga kamu masii ada sedikit hati buat nerima aku lagii, makasii yaa, btw kos kamu belum pindah kan, nanti sore aku ada ngirim sesuatu buat kamuu, lovee uu forever mwahh
+      </p>
+      <p class="tanda">from,<br>rizwar rizqi 🦋</p>
+    </div>
+    <!-- ✏️ EDIT: tulisan tombol -->
+    <button class="tombol" id="ulangi">Baca dari awal 💜</button>
+  </section>
+</main>
+
+<!-- Tombol musik: klik untuk putar/jeda -->
+<button class="musik" id="musik" aria-label="Putar atau jeda musik" title="Putar / jeda musik">🎵</button>
+
+<script>
+  /* ============================================================
+     ⚙️ PENGATURAN
+     ============================================================ */
+
+  // ✏️ EDIT: hiasan yang melayang di latar (boleh ganti/tambah emoji)
+  const HIASAN = ["💜", "⭐", "🎈", "🦋", "✨", "🍬"];
+
+  // ✏️ EDIT: jumlah hiasan melayang (0 untuk mematikan)
+  const JUMLAH_HIASAN = 16;
+
+  // ✏️ EDIT: teks petunjuk setelah surat dibuka
+  const PETUNJUK_SETELAH_BUKA = "Semoga suka ya 🥹";
+
+  // 📸 EDIT: daftar slide kenangan.
+  // Taruh foto di folder "foto" (sejajar index.html), lalu isi nama file-nya di "foto".
+  // Mau tambah slide? Salin satu baris { ... }, tempel, dan beri koma di akhir.
+  // Mau kurangi? Hapus barisnya. Jumlah slide menyesuaikan otomatis.
+  const SLIDES = [
+    { foto: "foto/1.jpg", judul: "Pertama kali ketemu", teks: "Hari itu aku belum tahu kamu bakal jadi orang penting." },
+    { foto: "foto/2.jpg", judul: "Jalan-jalan seru",    teks: "Capek, tapi ketawanya nggak berhenti." },
+    { foto: "foto/3.jpg", judul: "Idul Fitri bareng kamu",   teks: "Bagian favoritku: kamu yang selalu minta dicicipin." },
+    { foto: "foto/4.jpg", judul: "Hari yang random",    teks: "Nggak direncanain, tapi malah jadi yang paling kuingat." },
+    { foto: "foto/5.jpg", judul: "Nasgor",     teks: "telor dadar, ga pedes sama sekali. 💜" },
+  ];
+
+  // 🎂 EDIT: jumlah lilin di kue (1–5 paling pas)
+  const JUMLAH_LILIN = 3;
+
+  // 🌬️ EDIT: kepekaan mikrofon, angka 0.1–0.9.
+  // Makin KECIL = makin peka (lilin gampang padam). Kalau padam sendiri, naikkan angkanya.
+  const SENSITIVITAS_MIC = 0.5;
+
+  // 🎉 EDIT: pesan setelah lilin padam
+  const PESAN_SELESAI = "Yeay! Semoga semua keinginan kamu terkabul! 🎉";
+
+  // 🔒 EDIT: kata sandi untuk membuka surat (huruf besar/kecil diabaikan)
+  const PASSWORD = "inul";
+
+  // 🔒 EDIT: petunjuk/clue yang tampil di layar kata sandi
+  const PETUNJUK_PASSWORD = "Clue: Artis Dangdut 😉";
+
+  /* ============================================================
+     ⛔ Di bawah ini logika program. Tidak perlu diubah.
+     ============================================================ */
+  const amplop   = document.getElementById("amplop");
+  const surat    = document.getElementById("surat");
+  const petunjuk = document.getElementById("petunjuk");
+  const lagu     = document.getElementById("lagu");
+  const tombolM  = document.getElementById("musik");
+  const tombolU  = document.getElementById("ulang");
+  const aksi     = document.getElementById("aksiSurat");
+  const petunjukAwal = petunjuk.textContent;
+
+  // Hiasan melayang
+  for (let i = 0; i < JUMLAH_HIASAN; i++) {
+    const el = document.createElement("span");
+    el.className = "melayang";
+    el.textContent = HIASAN[i % HIASAN.length];
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.fontSize = 16 + Math.random() * 22 + "px";
+    el.style.animationDuration = 9 + Math.random() * 10 + "s";
+    el.style.animationDelay = -Math.random() * 15 + "s";
+    document.body.appendChild(el);
+  }
+
+  // Musik: browser hanya mengizinkan suara setelah pengunjung mengklik sesuatu,
+  // jadi musik mulai saat amplop dibuka.
+  function setMusik(nyala) {
+    if (nyala) {
+      lagu.play().then(() => tombolM.classList.add("main")).catch(() => {
+        // File mp3 tidak ditemukan / diblokir browser
+        console.warn("Musik tidak bisa diputar. Cek nama & lokasi file mp3 di tag <audio>.");
+      });
+    } else {
+      lagu.pause();
+      tombolM.classList.remove("main");
+    }
+  }
+  tombolM.addEventListener("click", () => setMusik(lagu.paused));
+
+  // Buka amplop
+  function bukaSurat() {
+    if (amplop.classList.contains("buka")) return;
+    amplop.classList.add("buka");
+    setMusik(true);
+    petunjuk.textContent = PETUNJUK_SETELAH_BUKA;
+    setTimeout(() => {
+      amplop.classList.add("hilang");
+      surat.classList.add("tampil");
+      aksi.hidden = false;
+    }, 800);
+  }
+  amplop.addEventListener("click", bukaSurat);
+  amplop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); bukaSurat(); } });
+
+  // Tutup surat kembali jadi amplop
+  tombolU.addEventListener("click", () => {
+    surat.classList.remove("tampil");
+    aksi.hidden = true;
+    amplop.classList.remove("hilang", "buka");
+    petunjuk.textContent = petunjukAwal;
+  });
+
+  /* ---------- Slide kenangan ---------- */
+  const $ = id => document.getElementById(id);
+  const kenanganPanel = $("kenanganPanel"), lilinPanel = $("lilinPanel");
+  const fotoBox = $("foto"), fotoImg = $("fotoImg"), polaroid = $("polaroid");
+  const titik = $("titik");
+  let idx = 0;
+
+  SLIDES.forEach(() => titik.appendChild(document.createElement("i")));
+
+  function tampilSlide(i) {
+    idx = (i + SLIDES.length) % SLIDES.length;
+    const s = SLIDES[idx];
+    fotoBox.classList.remove("kosong");
+    fotoImg.onerror = () => fotoBox.classList.add("kosong"); // file foto tidak ketemu
+    fotoImg.src = s.foto;
+    fotoImg.alt = s.judul;
+    $("fotoJudul").textContent = s.judul;
+    $("fotoTeks").textContent = s.teks;
+    polaroid.classList.toggle("ganti", idx % 2 === 1);
+    [...titik.children].forEach((t, n) => t.classList.toggle("aktif", n === idx));
+  }
+
+  $("kenangan").addEventListener("click", () => {
+    surat.classList.remove("tampil");
+    aksi.hidden = true;
+    kenanganPanel.hidden = false;
+    petunjuk.textContent = "Geser atau tekan panah untuk lihat fotonya 💜";
+    tampilSlide(0);
+  });
+  $("prev").addEventListener("click", () => tampilSlide(idx - 1));
+  $("next").addEventListener("click", () => tampilSlide(idx + 1));
+  document.addEventListener("keydown", e => {
+    if (kenanganPanel.hidden) return;
+    if (e.key === "ArrowLeft") tampilSlide(idx - 1);
+    if (e.key === "ArrowRight") tampilSlide(idx + 1);
+  });
+  // Geser jari di layar HP
+  let awalX = 0;
+  polaroid.addEventListener("touchstart", e => { awalX = e.touches[0].clientX; }, { passive: true });
+  polaroid.addEventListener("touchend", e => {
+    const selisih = e.changedTouches[0].clientX - awalX;
+    if (Math.abs(selisih) > 40) tampilSlide(idx + (selisih < 0 ? 1 : -1));
+  });
+
+  /* ---------- Sesi tiup lilin ---------- */
+  const status = $("statusLilin"), tombolMic = $("mic"), tombolTap = $("tap"), tombolUlangi = $("ulangi");
+  let sudahPadam = false;
+
+  function siapkanLilin() {
+    sudahPadam = false;
+    $("lilinBaris").innerHTML = '<div class="lilin"><i class="api"></i></div>'.repeat(JUMLAH_LILIN);
+    status.textContent = "";
+    tombolMic.disabled = false;
+    tombolTap.disabled = false;
+    $("aksiLilin").hidden = false;
+  }
+
+  $("keLilin").addEventListener("click", () => {
+    kenanganPanel.hidden = true;
+    lilinPanel.hidden = false;
+    petunjuk.textContent = "Satu langkah lagi ✨";
+    siapkanLilin();
+  });
+
+  function konfeti() {
+    const bentuk = ["🎉", "🎊", "💜", "⭐", "🎈", "✨"];
+    for (let i = 0; i < 40; i++) {
+      const el = document.createElement("span");
+      el.className = "konfeti";
+      el.textContent = bentuk[i % bentuk.length];
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.fontSize = 18 + Math.random() * 18 + "px";
+      el.style.animationDuration = 3 + Math.random() * 3 + "s";
+      el.style.animationDelay = Math.random() * 1.2 + "s";
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 8000);
+    }
+  }
+
+  function padamkan() {
+    if (sudahPadam) return;
+    sudahPadam = true;
+    lagu.volume = 1; // kembalikan volume musik
+    document.querySelectorAll(".lilin").forEach((l, i) => setTimeout(() => l.classList.add("padam"), i * 250));
+    status.textContent = PESAN_SELESAI;
+    $("aksiLilin").hidden = true;
+    konfeti();
+    // Beri jeda ±3,5 detik supaya konfeti & pesan terbaca, lalu pindah ke kata penutup
+    setTimeout(() => {
+      lilinPanel.hidden = true;
+      $("penutupPanel").hidden = false;
+      petunjuk.textContent = "";
+    }, 3500);
+  }
+
+  // Cara 1: ketuk tombol (cadangan kalau mikrofon tidak bisa dipakai)
+  tombolTap.addEventListener("click", padamkan);
+
+  // Cara 2: tiup ke mikrofon
+  tombolMic.addEventListener("click", async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true } });
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const analis = ctx.createAnalyser();
+      analis.fftSize = 512;
+      ctx.createMediaStreamSource(stream).connect(analis);
+      const data = new Uint8Array(analis.fftSize);
+      let berturut = 0;
+
+      tombolMic.disabled = true;
+      lagu.volume = 0.15; // kecilkan musik supaya tidak ikut "ditiup"
+      status.textContent = "Mikrofon aktif. Tiup sekarang! 🌬️";
+
+      (function cek() {
+        if (sudahPadam) { stream.getTracks().forEach(t => t.stop()); ctx.close(); return; }
+        analis.getByteTimeDomainData(data);
+        let puncak = 0;
+        for (const v of data) puncak = Math.max(puncak, Math.abs(v - 128) / 128);
+        berturut = puncak > SENSITIVITAS_MIC ? berturut + 1 : 0;
+        if (berturut > 10) padamkan(); // tiupan harus bertahan sekitar 0,2 detik
+        requestAnimationFrame(cek);
+      })();
+    } catch (err) {
+      status.textContent = "Mikrofon tidak bisa dipakai. Ketuk tombol di sebelahnya ya 😊";
+    }
+  });
+
+  // Mulai lagi dari amplop
+  tombolUlangi.addEventListener("click", () => {
+    lilinPanel.hidden = true;
+    $("penutupPanel").hidden = true;
+    tombolU.click();
+  });
+
+  /* ---------- Kata sandi ---------- */
+  // Catatan: sandi ini hanya pengaman ringan (tersimpan di kode halaman),
+  // cukup untuk kejutan, bukan untuk rahasia penting.
+  const gerbang = $("gerbang"), formPw = $("formPw"), inputPw = $("inputPw"), galatPw = $("galatPw");
+  $("petunjukPw").textContent = PETUNJUK_PASSWORD;
+  inputPw.focus();
+
+  formPw.addEventListener("submit", e => {
+    e.preventDefault();
+    if (inputPw.value.trim().toLowerCase() === PASSWORD.toLowerCase()) {
+      gerbang.hidden = true;
+    } else {
+      galatPw.textContent = "Kata sandinya belum tepat, coba lagi ya 🥺";
+      formPw.classList.remove("salah");
+      void formPw.offsetWidth; // restart animasi getar
+      formPw.classList.add("salah");
+      inputPw.select();
+    }
+  });
+</script>
+</body>
+</html>
